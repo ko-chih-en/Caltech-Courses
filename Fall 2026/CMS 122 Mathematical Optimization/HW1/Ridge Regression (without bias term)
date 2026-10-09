@@ -1,0 +1,36 @@
+clear, clc;
+
+train_data = readmatrix('housing_train.csv');
+train_X = train_data(:, 1:end-1);
+train_Y = train_data(:, end);
+test_data = readmatrix('housing_test.csv');
+test_X = test_data(:, 1:end-1);
+test_Y = test_data(:, end);
+
+d = size(train_X, 2);
+N = 1000;
+lambda = linspace(0, 200, N);
+train_error = zeros(N, 1);
+test_error = zeros(N, 1);
+bias = [ones(size(train_X, 1), 1); zeros(d, 1)];
+
+for i = 1:N
+    X = [train_X; sqrt(lambda(i)) * eye(d)];
+    Y = [train_Y; zeros(d, 1)];
+
+    a = (transpose(X) * X) \ transpose(X) * Y;
+    test_error(i) = norm(test_Y - test_X * a) ^ 2 / size(test_Y, 1);
+end
+
+
+[minimum, index] = min(test_error);
+
+plot(lambda, test_error, 'LineWidth', 3);
+hold on
+plot(lambda(index), minimum, '.', 'MarkerSize', 30);
+text(lambda(index), minimum - 0.01, sprintf('$\\lambda$ = %.2f', lambda(index)), ...
+    'FontSize', 16, 'Interpreter', 'latex');
+title('Test Error versus $\lambda$', 'Interpreter', 'latex', 'FontSize', 16);
+xlabel('$\lambda$', 'Interpreter', 'latex', 'FontSize', 16);
+ylabel('Test Error', 'Interpreter', 'latex', 'FontSize', 16);
+ylim([minimum - 0.02, max(test_error) + 0.02]);
